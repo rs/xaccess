@@ -52,17 +52,17 @@ func TestResponseStatus(t *testing.T) {
 	assert.Equal(t, "error", responseStatus(fakeContext{err: nil}, http.StatusFound))
 }
 
-func TestServeHTTPC(t *testing.T) {
-	h := NewHandler(xhandler.HandlerFuncC(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func TestNewHandler(t *testing.T) {
+	h := NewHandler()(xhandler.HandlerFuncC(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte{'1', '2', '3'})
 	}))
-	l := xlog.NewHandler(0, h)
+	l := xlog.NewHandler(0)
 	o := &recorderOutput{}
 	l.SetOutput(o)
 	r, _ := http.NewRequest("GET", "/path", nil)
 	w := httptest.NewRecorder()
-	l.ServeHTTPC(context.Background(), w, r)
+	l.Handle(h).ServeHTTPC(context.Background(), w, r)
 	runtime.Gosched()
 	for i := 0; len(o.last) == 0 && i < 100; i++ {
 		time.Sleep(10 * time.Millisecond)
