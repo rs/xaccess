@@ -9,7 +9,7 @@ Package xaccess is a middleware that logs all access requests performed on the s
 ```go
 c := xhandler.Chain{}
 
-c.UseC(xlog.NewHandler(xlog.LevelDebug).Handle)
+c.UseC(xlog.NewHandler(xlog.LevelDebug).HandlerC)
 c.UseC(xstats.NewHandler(dogstatsd.New(statsdWriter, flushInterval), tags))
 
 c.UseC(xaccess.NewHandler())

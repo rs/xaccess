@@ -62,7 +62,7 @@ func TestNewHandler(t *testing.T) {
 	l.SetOutput(o)
 	r, _ := http.NewRequest("GET", "/path", nil)
 	w := httptest.NewRecorder()
-	l.Handle(h).ServeHTTPC(context.Background(), w, r)
+	l.HandlerC(h).ServeHTTPC(context.Background(), w, r)
 	runtime.Gosched()
 	for i := 0; len(o.last) == 0 && i < 100; i++ {
 		time.Sleep(10 * time.Millisecond)
