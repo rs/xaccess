@@ -1,6 +1,7 @@
 package xaccess
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"runtime"
@@ -79,4 +80,29 @@ func TestNewHandler(t *testing.T) {
 		assert.NotEmpty(t, o.last["duration"])
 		assert.NotEmpty(t, o.last["time"])
 	}
+
+	xx := string(bytes.Repeat([]byte{'x'}, 150))
+	r, _ = http.NewRequest("GET", "/"+xx, nil)
+	w = httptest.NewRecorder()
+	l(h).ServeHTTPC(context.Background(), w, r)
+	runtime.Gosched()
+	for i := 0; len(o.last) == 0 && i < 100; i++ {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if assert.NotNil(t, o.last) {
+		assert.Equal(t, "GET /"+xx[:48]+"..."+xx[:49]+" 202", o.last["message"])
+	}
+}
+
+func TestEllipsize(t *testing.T) {
+	assert.Equal(t, "", ellipsize("", 10))
+	assert.Equal(t, "s...g", ellipsize("somestring", 5))
+	assert.Equal(t, "somestring", ellipsize("somestring", 10))
+	assert.Equal(t, "som...ing", ellipsize("somestring", 9))
+	assert.Equal(t, "", ellipsize("somestring", 0))
+	assert.Equal(t, ".", ellipsize("somestring", 1))
+	assert.Equal(t, "..", ellipsize("somestring", 2))
+	assert.Equal(t, "...", ellipsize("somestring", 3))
+	assert.Equal(t, "s...g", ellipsize("somestring", 4))
+	assert.Equal(t, "s...g", ellipsize("somestring", 5))
 }

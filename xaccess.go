@@ -46,7 +46,7 @@ func NewHandler() func(next xhandler.HandlerC) xhandler.HandlerC {
 
 			// Log access info
 			log := xlog.FromContext(ctx)
-			log.Infof("%s %s %03d", r.Method, r.URL.String(), lw.Status(), xlog.F{
+			log.Infof("%s %s %03d", r.Method, ellipsize(r.URL.String(), 100), lw.Status(), xlog.F{
 				"method":      r.Method,
 				"uri":         r.URL.String(),
 				"type":        "access",
@@ -69,4 +69,15 @@ func responseStatus(ctx context.Context, statusCode int) string {
 		return "ok"
 	}
 	return "error"
+}
+
+// ellipsize shorten a string using ellises in the middle if the string
+// is longer than max.
+func ellipsize(s string, max int) string {
+	if max <= 3 {
+		s = "..."[:max]
+	} else if l := len(s); l > max {
+		s = s[:max/2-1] + "..." + s[l-(max/2)+1:]
+	}
+	return s
 }
