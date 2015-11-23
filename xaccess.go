@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// Handle returns a handler that log access information about each request performed
+// NewHandler returns a handler that log access information about each request performed
 // on the provided sub-handlers. Uses context's github.com/rs/xlog and
 // github.com/rs/xstats if present for logging.
 func NewHandler() func(next xhandler.HandlerC) xhandler.HandlerC {
