@@ -47,8 +47,6 @@ func NewHandler() func(next xhandler.HandlerC) xhandler.HandlerC {
 			// Log access info
 			log := xlog.FromContext(ctx)
 			log.Infof("%s %s %03d", r.Method, ellipsize(r.URL.String(), 100), lw.Status(), xlog.F{
-				"method":      r.Method,
-				"uri":         r.URL.String(),
 				"type":        "access",
 				"status":      status,
 				"status_code": lw.Status(),
