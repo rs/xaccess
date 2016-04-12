@@ -73,7 +73,6 @@ func TestNewHandler(t *testing.T) {
 		assert.Equal(t, 3, o.last["size"])
 		assert.Equal(t, "info", o.last["level"])
 		assert.Equal(t, "access", o.last["type"])
-		assert.Equal(t, "GET", o.last["method"])
 		assert.Equal(t, "ok", o.last["status"])
 		assert.Equal(t, 202, o.last["status_code"])
 		assert.Equal(t, "GET /path 202", o.last["message"])
