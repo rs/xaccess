@@ -1,4 +1,4 @@
-// +build go1.7
+// +build !go1.7
 
 package xaccess
 
@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rs/xhandler"
 	"github.com/rs/xlog"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -55,7 +56,7 @@ func TestResponseStatus(t *testing.T) {
 }
 
 func TestNewHandler(t *testing.T) {
-	h := NewHandler()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	h := NewHandler()(xhandler.HandlerFuncC(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte{'1', '2', '3'})
 	}))
@@ -65,7 +66,7 @@ func TestNewHandler(t *testing.T) {
 	})
 	r, _ := http.NewRequest("GET", "/path", nil)
 	w := httptest.NewRecorder()
-	l(h).ServeHTTP(w, r)
+	l(h).ServeHTTPC(context.Background(), w, r)
 	runtime.Gosched()
 	for i := 0; len(o.last) == 0 && i < 100; i++ {
 		time.Sleep(10 * time.Millisecond)
@@ -84,7 +85,7 @@ func TestNewHandler(t *testing.T) {
 	xx := string(bytes.Repeat([]byte{'x'}, 150))
 	r, _ = http.NewRequest("GET", "/"+xx, nil)
 	w = httptest.NewRecorder()
-	l(h).ServeHTTP(w, r)
+	l(h).ServeHTTPC(context.Background(), w, r)
 	runtime.Gosched()
 	for i := 0; len(o.last) == 0 && i < 100; i++ {
 		time.Sleep(10 * time.Millisecond)

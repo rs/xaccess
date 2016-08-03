@@ -1,4 +1,4 @@
-// +build go1.7
+// +build !go1.7
 
 // Package xaccess is a middleware that logs all access requests performed on the sub handler
 // using github.com/rs/xlog and github.com/rs/xstats stored in context.
@@ -9,19 +9,19 @@ import (
 	"strconv"
 	"time"
 
-	"context"
-
+	"github.com/rs/xhandler"
 	"github.com/rs/xlog"
 	"github.com/rs/xstats"
 	"github.com/zenazn/goji/web/mutil"
+	"golang.org/x/net/context"
 )
 
 // NewHandler returns a handler that log access information about each request performed
 // on the provided sub-handlers. Uses context's github.com/rs/xlog and
 // github.com/rs/xstats if present for logging.
-func NewHandler() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func NewHandler() func(next xhandler.HandlerC) xhandler.HandlerC {
+	return func(next xhandler.HandlerC) xhandler.HandlerC {
+		return xhandler.HandlerFuncC(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 			// Time request
 			reqStart := time.Now()
 
@@ -29,13 +29,10 @@ func NewHandler() func(next http.Handler) http.Handler {
 			lw := mutil.WrapWriter(w)
 
 			// Call the next handler
-			next.ServeHTTP(lw, r)
+			next.ServeHTTPC(ctx, lw, r)
 
 			// Conpute request duration
 			reqDur := time.Since(reqStart)
-
-			// Extract context from request
-			ctx := r.Context()
 
 			// Get request status
 			status := responseStatus(ctx, lw.Status())
